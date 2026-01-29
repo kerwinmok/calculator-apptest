@@ -8,6 +8,7 @@ public class Calculator {
     int boardHeight = 540;
 
     JFrame frame = new JFrame("Calculator");
+    JLabel expressionLabel = new JLabel();
     JLabel displayLabel = new JLabel();
     JPanel textPanel = new JPanel();
     JPanel buttonPanel = new JPanel();
@@ -22,6 +23,7 @@ public class Calculator {
 
     double num1 = 0, num2 = 0, result = 0;
     char operator;
+    String expressionText = "";
 
     Calculator() {
         frame.setVisible(true);
@@ -34,6 +36,13 @@ public class Calculator {
         textPanel.setLayout(new BorderLayout());
         textPanel.setBounds(0, 0, boardWidth, 100);
 
+        expressionLabel.setBackground(Color.DARK_GRAY);
+        expressionLabel.setForeground(Color.LIGHT_GRAY);
+        expressionLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+        expressionLabel.setHorizontalAlignment(JLabel.RIGHT);
+        expressionLabel.setText("");
+        expressionLabel.setOpaque(true);
+
         displayLabel.setBackground(Color.DARK_GRAY);
         displayLabel.setForeground(Color.WHITE);
         displayLabel.setFont(new Font("Arial", Font.BOLD, 50));
@@ -41,7 +50,8 @@ public class Calculator {
         displayLabel.setText("0");
         displayLabel.setOpaque(true);
 
-        textPanel.add(displayLabel);
+        textPanel.add(expressionLabel, BorderLayout.NORTH);
+        textPanel.add(displayLabel, BorderLayout.CENTER);
         frame.add(textPanel, BorderLayout.NORTH);
 
         buttonPanel.setLayout(new GridLayout(5, 4, 10, 10));
@@ -95,7 +105,7 @@ public class Calculator {
         percButton.addActionListener(new ButtonClickListener());
 
         // Add buttons to panel in order (5 rows x 4 columns)
-        // Row 1: C, Del, %, /
+    
         buttonPanel.add(clrButton);
         buttonPanel.add(delButton);
         buttonPanel.add(percButton);
@@ -133,7 +143,7 @@ public class Calculator {
             String command = source.getText();
 
             if ((command.charAt(0) >= '0' && command.charAt(0) <= '9')) {
-                // If text is "0" replace it, otherwise append.
+                // If text is 0 replace, else append.
                 if (displayLabel.getText().equals("0")) {
                     displayLabel.setText(command);
                 } else {
@@ -145,9 +155,11 @@ public class Calculator {
                 }
             } else if (command.equals("C")) {
                 displayLabel.setText("0");
+                expressionLabel.setText("");
                 num1 = 0;
                 num2 = 0;
                 operator = '\0';
+                expressionText = "";
             } else if (command.equals("Del")) {
                 String text = displayLabel.getText();
                 if (text.length() > 0) {
@@ -157,12 +169,12 @@ public class Calculator {
                     }
                 }
             } else if (command.equals("(-)")) {
-                // Negate current number
+                // negate current #
                 try {
                     double val = Double.parseDouble(displayLabel.getText());
                     val *= -1;
                     displayLabel.setText(String.valueOf(val));
-                    // Remove .0 if integer
+                    // remove .0 if int
                     if (val % 1 == 0) {
                         displayLabel.setText(String.valueOf((int) val));
                     }
@@ -180,43 +192,56 @@ public class Calculator {
             } else if (command.equals("=")) {
                 num2 = Double.parseDouble(displayLabel.getText());
 
-                switch (operator) {
-                    case '+':
-                        result = num1 + num2;
-                        break;
-                    case '-':
-                        result = num1 - num2;
-                        break;
-                    case '×':
-                        result = num1 * num2;
-                        break;
-                    case '÷':
-                        if (num2 != 0)
-                            result = num1 / num2;
-                        else {
-                            displayLabel.setText("Error");
-                            return;
-                        }
-                        break;
-                    default:
-                        result = num2; // No operator clicked
-                        break;
+                // check operator and calculate
+                if (operator == '+') {
+                    result = num1 + num2;
+                } else if (operator == '-') {
+                    result = num1 - num2;
+                } else if (operator == '×') {
+                    result = num1 * num2;
+                } else if (operator == '÷') {
+                    if (num2 != 0) {
+                        result = num1 / num2;
+                    } else {
+                        displayLabel.setText("Error");
+                        return;
+                    }
+                } else {
+                    // no operator clicked
+                    result = num2;
                 }
+                
+                // update expression: show num2 and result
+                if (num2 % 1 == 0) {
+                    expressionText += (int) num2 + " =";
+                } else {
+                    expressionText += num2 + " =";
+                }
+                expressionLabel.setText(expressionText);
+                
+                // set display to result
                 displayLabel.setText(String.valueOf(result));
-                // Remove .0 if integer
+                // remove .0 if int
                 if (result % 1 == 0 && !displayLabel.getText().equals("Error")) {
                     displayLabel.setText(String.valueOf((int) result));
                 }
                 num1 = result;
-                // operator = '\0'; // Keep operator? No, clear it.
+                // op = '\0'; // 
             } else {
-                // Operator buttons
+                // op buttons: +, -, ×, ÷
                 try {
                     num1 = Double.parseDouble(displayLabel.getText());
                     operator = command.charAt(0);
+                    
+                    // format expression text: remove .0 if int
+                    if (num1 % 1 == 0) {
+                        expressionText = (int) num1 + " " + command + " ";
+                    } else {
+                        expressionText = num1 + " " + command + " ";
+                    }
+                    expressionLabel.setText(expressionText);
+                    
                     displayLabel.setText("0");
-                    // Usually calculators don't clear explicitly but value is stored.
-                    // This is simple implementation: after operator, type new number.
                 } catch (NumberFormatException ex) {
                     displayLabel.setText("Error");
                 }
