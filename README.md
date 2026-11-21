@@ -12,6 +12,14 @@ I built this project as a desktop calculator in Java Swing to practice GUI layou
 - Clear all state (`C`)
 - Expression preview line above the main display
 
+## Screenshots
+
+### In-progress expression (`128 + 32`)
+![Calculator Expression View](docs/images/calculator-expression.png)
+
+### Evaluated result (`160`)
+![Calculator Result View](docs/images/calculator-result.png)
+
 ## Tech stack
 
 - Java
